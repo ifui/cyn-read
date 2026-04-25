@@ -86,12 +86,6 @@ const clearDefaultPath = async () => {
         @close="showError = false"
       >
         <p class="text-sm">{{ errorMessage }}</p>
-        <p class="text-xs mt-2 opacity-70">
-          如果在 Linux 上遇到问题，请确保已安装 xdg-desktop-portal：
-        </p>
-        <code class="text-xs bg-black/10 px-2 py-1 rounded mt-1 inline-block">
-          sudo apt install xdg-desktop-portal-gtk
-        </code>
       </n-alert>
 
       <n-card title="外观设置" class="settings-card mb-4">

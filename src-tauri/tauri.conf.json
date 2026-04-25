@@ -15,7 +15,10 @@
       "all": false,
       "fs": {
         "all": true,
-        "scope": ["**"]
+        "scope": {
+          "allow": ["**"],
+          "deny": []
+        }
       },
       "dialog": {
         "all": true,
@@ -53,14 +56,12 @@
         "center": true
       },
       {
-        "width": 400,
-        "height": 300,
+        "width": 600,
+        "height": 500,
         "decorations": false,
         "url": "splashscreen.html",
         "label": "splashscreen",
-        "center": true,
-        "transparent": true,
-        "alwaysOnTop": true
+        "center": true
       }
     ],
     "security": {

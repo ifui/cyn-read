@@ -26,9 +26,8 @@
       align-items: center;
       justify-content: center;
       background: linear-gradient(135deg, #faf8f4 0%, #f5f2ec 50%, #e8e4dc 100%);
-      font-family: 'Noto Serif SC', 'Source Han Serif SC', 'Microsoft YaHei', serif;
+      font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
       position: relative;
-      border-radius: 12px;
     }
 
     body::before {
@@ -64,8 +63,19 @@
       width: 120px;
       height: 120px;
       border-radius: 24px;
+      background: linear-gradient(135deg, #c9a86c 0%, #b89555 100%);
       box-shadow: 0 8px 32px rgba(60, 60, 60, 0.15);
       animation: float 3s ease-in-out infinite;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .logo::before {
+      content: '芯';
+      font-size: 56px;
+      color: #faf8f4;
+      font-weight: 700;
     }
 
     .ink-splash {
@@ -325,7 +335,7 @@
   <div class="splash-container">
     <div class="logo-wrapper">
       <div class="ink-splash"></div>
-      <img src="icons/128x128.png" alt="芯阅" class="logo">
+      <div class="logo"></div>
       <div class="ink-ring"></div>
     </div>
     <div class="title">芯阅</div>
