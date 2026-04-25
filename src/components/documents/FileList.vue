@@ -165,8 +165,8 @@ const updateSelectionStyle = () => {
     top: `${top}px`,
     width: `${width}px`,
     height: `${height}px`,
-    backgroundColor: "rgba(59, 130, 246, 0.15)",
-    border: "1px solid rgba(59, 130, 246, 0.5)",
+    backgroundColor: "rgba(201, 168, 108, 0.15)",
+    border: "1px solid rgba(201, 168, 108, 0.5)",
     borderRadius: "4px",
     pointerEvents: "none",
     zIndex: 1000,
@@ -194,20 +194,20 @@ defineExpose({
 <template>
   <div
     ref="containerRef"
-    class="flex-1 overflow-auto p-4 md:p-6 bg-gradient-to-br from-gray-50 to-gray-100 relative"
+    class="file-list-container flex-1 overflow-auto p-4 md:p-6 relative h-full"
     @contextmenu="emit('handleBackgroundContextMenu', $event)"
     @mousedown="handleMouseDown"
   >
     <div v-if="isSelecting" :style="selectionStyle"></div>
 
-    <n-spin :show="loading">
+    <n-spin :show="loading" class="h-full w-full">
       <div
+        class="absolute flex items-center justify-center h-full w-full"
         v-if="files.length === 0 && !loading"
-        class="absolute inset-0 flex items-center justify-center"
       >
         <n-empty description="暂无文件" size="large">
           <template #icon>
-            <i class="ri-folder-open-line text-6xl text-gray-300"></i>
+            <i class="ri-folder-open-line text-56xl empty-icon"></i>
           </template>
         </n-empty>
       </div>
@@ -219,11 +219,10 @@ defineExpose({
         <div
           v-for="file in files"
           :key="file.path"
-          class="file-card group bg-white p-4 md:p-5 rounded-2xl border-2 cursor-pointer transition-all duration-200 ease-out relative"
+          class="file-card group p-4 md:p-5 rounded-2xl border-2 cursor-pointer transition-all duration-200 ease-out relative"
           :class="{
             'selected-file': isFileSelected(file),
-            'hover:border-blue-300 hover:shadow-lg': !isFileSelected(file),
-            'hover:scale-[1.02]': editingFile?.path !== file.path,
+            'hover-selected': !isFileSelected(file),
           }"
           @click="emit('handleFileClick', file, $event)"
           @dblclick="emit('handleFileDoubleClick', file)"
@@ -251,11 +250,11 @@ defineExpose({
               ></i>
               <div
                 v-if="!file.isDirectory"
-                class="absolute -bottom-1 -right-1 w-6 h-6 bg-white rounded-full shadow-md flex items-center justify-center"
+                class="extension-badge absolute -bottom-1 -right-1 w-6 h-6 rounded-full shadow-md flex items-center justify-center"
               >
-                <span class="text-[10px] font-bold text-gray-500">{{
-                  file.extension.toUpperCase()
-                }}</span>
+                <span class="text-[10px] font-bold">
+                  {{ file.extension.toUpperCase().substring(0, 3) }}
+                </span>
               </div>
             </div>
             <div
@@ -276,12 +275,12 @@ defineExpose({
             </div>
             <div
               v-else
-              class="text-sm text-center font-medium truncate w-full"
+              class="file-name text-sm text-center font-medium truncate w-full"
               :title="file.name"
             >
               {{ file.name }}
             </div>
-            <div class="text-xs text-gray-400 mt-1">
+            <div class="file-meta text-xs mt-1">
               {{ file.isDirectory ? "文件夹" : formatFileSize(file.size) }}
             </div>
           </div>
@@ -292,11 +291,10 @@ defineExpose({
         <div
           v-for="file in files"
           :key="file.path"
-          class="file-list-item group bg-white p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 ease-out flex items-center gap-4 relative"
+          class="file-list-item group p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 ease-out flex items-center gap-4 relative"
           :class="{
             'selected-file': isFileSelected(file),
-            'hover:border-blue-300 hover:shadow-md': !isFileSelected(file),
-            'hover:translate-x-1': editingFile?.path !== file.path,
+            'hover-selected': !isFileSelected(file),
           }"
           @click="emit('handleFileClick', file, $event)"
           @dblclick="emit('handleFileDoubleClick', file)"
@@ -331,12 +329,12 @@ defineExpose({
                 @keyup.escape="cancelRename"
               />
             </div>
-            <div v-else class="font-medium text-base truncate">
+            <div v-else class="file-name font-medium text-base truncate">
               {{ file.name }}
             </div>
-            <div class="text-sm text-gray-400 mt-1 flex items-center gap-2">
+            <div class="file-meta text-sm mt-1 flex items-center gap-2">
               <span>{{ formatDate(file.modified) }}</span>
-              <span class="text-gray-300">·</span>
+              <span class="meta-divider">·</span>
               <span>{{
                 file.isDirectory ? "文件夹" : formatFileSize(file.size)
               }}</span>
@@ -344,9 +342,9 @@ defineExpose({
           </div>
           <div
             v-if="!file.isDirectory"
-            class="hidden sm:flex items-center gap-2 px-3 py-1 bg-gray-50 rounded-full"
+            class="extension-badge-list hidden sm:flex items-center gap-2 px-3 py-1 rounded-full"
           >
-            <span class="text-xs font-medium text-gray-500">{{
+            <span class="text-xs font-medium">{{
               file.extension.toUpperCase()
             }}</span>
           </div>
@@ -357,28 +355,65 @@ defineExpose({
 </template>
 
 <style scoped>
+.file-list-container {
+  background-color: var(--color-bg-secondary);
+}
+
+.empty-icon {
+  color: var(--color-text-muted);
+}
+
 .file-card,
 .file-list-item {
   user-select: none;
   border-color: transparent;
-  background: white;
+  background-color: var(--color-bg);
+  backdrop-filter: blur(10px);
+}
+
+.hover-selected:hover {
+  border-color: var(--color-accent);
+  box-shadow: 0 4px 12px var(--color-shadow);
+  transform: scale(1.02);
+}
+
+.file-list-item.hover-selected:hover {
+  transform: translateX(4px);
+}
+
+.selected-file {
+  background: linear-gradient(
+    135deg,
+    rgba(201, 168, 108, 0.1) 0%,
+    rgba(201, 168, 108, 0.05) 100%
+  );
+  border-color: var(--color-accent) !important;
+  box-shadow: 0 4px 12px rgba(201, 168, 108, 0.2);
+}
+
+.file-name {
+  color: var(--color-text);
+}
+
+.file-meta {
+  color: var(--color-text-muted);
+}
+
+.meta-divider {
+  color: var(--color-border);
+}
+
+.extension-badge {
+  background-color: var(--color-bg);
+  color: var(--color-text-secondary);
+}
+
+.extension-badge-list {
+  background-color: var(--color-bg-tertiary);
+  color: var(--color-text-secondary);
 }
 
 .rename-input :deep(.n-input__input-el) {
   font-weight: 500;
-}
-
-.file-card {
-  backdrop-filter: blur(10px);
-}
-
-.file-list-item {
-  backdrop-filter: blur(10px);
-}
-
-.selected-file {
-  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-  border-color: #3b82f6 !important;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
 }
 </style>

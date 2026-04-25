@@ -1,10 +1,19 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
-import { NButton, NInput, NCard, NDivider, useMessage } from "naive-ui";
+import {
+  NButton,
+  NInput,
+  NCard,
+  NDivider,
+  NSwitch,
+  useMessage,
+} from "naive-ui";
 import { configManager } from "../../utils/config";
 import { dialog } from "@tauri-apps/api";
+import { useThemeStore } from "../../stores/themeStore";
 
 const message = useMessage();
+const themeStore = useThemeStore();
 const defaultPath = ref("");
 
 onMounted(async () => {
@@ -43,17 +52,37 @@ const clearDefaultPath = async () => {
 </script>
 
 <template>
-  <div class="h-full overflow-auto p-6 bg-gray-50">
+  <div class="settings-container h-full overflow-auto p-6">
     <div class="max-w-4xl mx-auto">
-      <h1 class="text-2xl font-bold text-gray-800 mb-6">系统设置</h1>
+      <h1 class="page-title text-2xl font-bold mb-6">系统设置</h1>
 
-      <n-card title="文件管理" class="mb-4">
+      <n-card title="外观设置" class="settings-card mb-4">
+        <div class="space-y-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <label class="text-sm font-medium">深色模式</label>
+              <p class="text-xs mt-1 opacity-60">切换应用的明暗主题</p>
+            </div>
+            <n-switch
+              :value="themeStore.isDark"
+              @update:value="themeStore.toggleTheme"
+            >
+              <template #checked-icon>
+                <i class="ri-moon-line"></i>
+              </template>
+              <template #unchecked-icon>
+                <i class="ri-sun-line"></i>
+              </template>
+            </n-switch>
+          </div>
+        </div>
+      </n-card>
+
+      <n-card title="文件管理" class="settings-card mb-4">
         <div class="space-y-4">
           <div>
             <div class="flex items-center justify-between mb-2">
-              <label class="text-sm font-medium text-gray-700"
-                >默认文件夹</label
-              >
+              <label class="text-sm font-medium">默认文件夹</label>
               <div class="flex gap-2">
                 <n-button size="small" @click="selectFolder">
                   <template #icon>
@@ -76,31 +105,31 @@ const clearDefaultPath = async () => {
               placeholder="未设置默认文件夹"
             >
               <template #prefix>
-                <i class="ri-folder-line text-gray-400"></i>
+                <i class="ri-folder-line opacity-60"></i>
               </template>
             </n-input>
-            <p class="text-xs text-gray-500 mt-2">
+            <p class="text-xs mt-2 opacity-60">
               设置默认文件夹后，文档管理页面将自动显示该文件夹内容
             </p>
           </div>
         </div>
       </n-card>
 
-      <n-card title="关于" class="mb-4">
+      <n-card title="关于" class="settings-card mb-4">
         <div class="space-y-2">
           <div class="flex items-center justify-between">
-            <span class="text-sm text-gray-600">应用名称</span>
+            <span class="text-sm opacity-70">应用名称</span>
             <span class="text-sm font-medium">芯阅</span>
           </div>
           <n-divider style="margin: 12px 0" />
           <div class="flex items-center justify-between">
-            <span class="text-sm text-gray-600">版本</span>
+            <span class="text-sm opacity-70">版本</span>
             <span class="text-sm font-medium">0.1.0</span>
           </div>
           <n-divider style="margin: 12px 0" />
           <div class="flex items-center justify-between">
-            <span class="text-sm text-gray-600">Slogan</span>
-            <span class="text-sm text-gray-500">方寸芯阅，纸页随心</span>
+            <span class="text-sm opacity-70">Slogan</span>
+            <span class="text-sm opacity-60">方寸芯阅，纸页随心</span>
           </div>
         </div>
       </n-card>
@@ -108,4 +137,25 @@ const clearDefaultPath = async () => {
   </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.settings-container {
+  background-color: var(--color-bg-secondary);
+}
+
+.page-title {
+  color: var(--color-text);
+}
+
+.settings-card {
+  background-color: var(--color-bg);
+  border-color: var(--color-border);
+}
+
+.settings-card :deep(.n-card-header) {
+  color: var(--color-text);
+}
+
+.settings-card :deep(.n-card__content) {
+  color: var(--color-text-secondary);
+}
+</style>

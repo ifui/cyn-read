@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { h, ref } from "vue";
 import { useRouter } from "vue-router";
-import { NIcon } from "naive-ui";
+import { NIcon, NButton } from "naive-ui";
 import LayoutLogo from "./LayoutLogo.vue";
+import { useThemeStore } from "../../stores/themeStore";
 
 const router = useRouter();
+const themeStore = useThemeStore();
 const activeKey = ref<string>("home");
 
 const renderIcon = (icon: string) => {
@@ -80,7 +82,7 @@ const handleUpdateValue = (key: string) => {
 </script>
 
 <template>
-  <div class="h-full flex flex-col">
+  <div class="sider-container h-full flex flex-col">
     <LayoutLogo />
     <n-scrollbar class="flex-1">
       <n-menu
@@ -91,7 +93,37 @@ const handleUpdateValue = (key: string) => {
         @update:value="handleUpdateValue"
       />
     </n-scrollbar>
+    <div class="theme-toggle-wrapper p-3">
+      <n-button
+        quaternary
+        block
+        @click="themeStore.toggleTheme"
+        class="theme-toggle-btn"
+      >
+        <template #icon>
+          <i :class="themeStore.isDark ? 'ri-sun-line' : 'ri-moon-line'" class="text-lg"></i>
+        </template>
+        {{ themeStore.isDark ? '浅色模式' : '深色模式' }}
+      </n-button>
+    </div>
   </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.sider-container {
+  background-color: var(--color-bg);
+}
+
+.theme-toggle-wrapper {
+  border-top: 1px solid var(--color-border);
+}
+
+.theme-toggle-btn {
+  font-family: 'Noto Serif SC', serif;
+  color: var(--color-text-secondary);
+}
+
+.theme-toggle-btn:hover {
+  color: var(--color-accent);
+}
+</style>

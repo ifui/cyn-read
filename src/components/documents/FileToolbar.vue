@@ -66,7 +66,7 @@ const sortOptions = [
 </script>
 
 <template>
-  <div class="px-4 md:px-6 py-3 md:py-4 border-b border-gray-200 bg-white">
+  <div class="toolbar-container px-4 md:px-6 py-3 md:py-4">
     <div
       class="flex flex-col md:flex-row md:items-center md:justify-between gap-3"
     >
@@ -97,7 +97,7 @@ const sortOptions = [
           </n-button>
         </div>
 
-        <i class="ri-folder-line text-gray-400 text-lg hidden sm:block"></i>
+        <i class="ri-folder-line folder-icon text-lg hidden sm:block"></i>
 
         <div class="flex-1 min-w-0 overflow-x-auto items-center">
           <n-breadcrumb v-if="breadcrumbs.length > 0" class="text-sm">
@@ -112,7 +112,7 @@ const sortOptions = [
               >
             </n-breadcrumb-item>
           </n-breadcrumb>
-          <span v-else class="text-gray-400 text-sm"
+          <span v-else class="hint-text text-sm"
             >请先在设置中配置默认文件夹</span
           >
         </div>
@@ -121,9 +121,9 @@ const sortOptions = [
       <div class="flex items-center gap-1 md:gap-2 flex-shrink-0">
         <div
           v-if="selectedCount > 0"
-          class="flex items-center gap-2 px-3 py-1 bg-blue-50 rounded-lg mr-2"
+          class="selection-badge flex items-center gap-2 px-3 py-1 rounded-lg mr-2"
         >
-          <span class="text-sm text-blue-600 font-medium">
+          <span class="text-sm font-medium">
             已选择 {{ selectedCount }} 项
           </span>
           <n-button
@@ -133,7 +133,7 @@ const sortOptions = [
             @click="emit('clearSelection')"
           >
             <template #icon>
-              <i class="ri-close-line text-blue-600"></i>
+              <i class="ri-close-line"></i>
             </template>
           </n-button>
         </div>
@@ -195,3 +195,23 @@ const sortOptions = [
     </div>
   </div>
 </template>
+
+<style scoped>
+.toolbar-container {
+  background-color: var(--color-bg);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.folder-icon {
+  color: var(--color-text-muted);
+}
+
+.hint-text {
+  color: var(--color-text-muted);
+}
+
+.selection-badge {
+  background-color: rgba(201, 168, 108, 0.1);
+  color: var(--color-accent);
+}
+</style>

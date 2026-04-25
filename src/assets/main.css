@@ -1,1 +1,108 @@
+@import url("https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&display=swap");
 @import "tailwindcss";
+
+:root {
+  --color-primary: #5c5c5c;
+  --color-primary-light: #8c8c8c;
+  --color-primary-dark: #3a3a3a;
+  --color-accent: #c9a86c;
+  --color-accent-light: #dbb978;
+  --color-accent-dark: #b89555;
+  --color-bg: #faf8f4;
+  --color-bg-secondary: #f5f2ec;
+  --color-bg-tertiary: #e8e4dc;
+  --color-text: #2c2c2c;
+  --color-text-secondary: #5c5c5c;
+  --color-text-muted: #8c8c8c;
+  --color-border: #e0dcd4;
+  --color-shadow: rgba(0, 0, 0, 0.08);
+}
+
+.dark {
+  --color-primary: #c9a86c;
+  --color-primary-light: #dbb978;
+  --color-primary-dark: #b89555;
+  --color-accent: #c9a86c;
+  --color-accent-light: #dbb978;
+  --color-accent-dark: #b89555;
+  --color-bg: #1a1816;
+  --color-bg-secondary: #242220;
+  --color-bg-tertiary: #2a2826;
+  --color-text: #e8e4dc;
+  --color-text-secondary: #b8b4ac;
+  --color-text-muted: #6a6660;
+  --color-border: #3a3632;
+  --color-shadow: rgba(0, 0, 0, 0.4);
+}
+
+* {
+  font-family: "Noto Serif SC", "Source Han Serif SC", "Microsoft YaHei", serif;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-bg-secondary);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-muted);
+}
+
+::selection {
+  background-color: var(--color-accent);
+  color: var(--color-bg);
+}
+
+.n-layout {
+  background-color: var(--color-bg) !important;
+}
+
+.n-layout-sider {
+  background-color: var(--color-bg) !important;
+  border-color: var(--color-border) !important;
+}
+
+.n-layout-content {
+  background-color: var(--color-bg-secondary) !important;
+  border-color: var(--color-border) !important;
+}
+
+.n-layout-footer {
+  background-color: var(--color-bg) !important;
+  border-color: var(--color-border) !important;
+}
+
+.ink-transition {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.seal-stamp {
+  background: linear-gradient(
+    135deg,
+    var(--color-accent) 0%,
+    var(--color-accent-dark) 100%
+  );
+  color: var(--color-bg);
+  padding: 2px 8px;
+  border-radius: 2px;
+  font-size: 12px;
+  font-weight: 600;
+}
