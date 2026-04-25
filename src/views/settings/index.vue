@@ -6,6 +6,7 @@ import {
   NCard,
   NDivider,
   NSwitch,
+  NAlert,
   useMessage,
 } from "naive-ui";
 import { configManager } from "../../utils/config";
@@ -15,14 +16,25 @@ import { useThemeStore } from "../../stores/themeStore";
 const message = useMessage();
 const themeStore = useThemeStore();
 const defaultPath = ref("");
+const errorMessage = ref("");
+const showError = ref(false);
 
 onMounted(async () => {
-  await configManager.init();
-  const config = configManager.get();
-  defaultPath.value = config.defaultPath;
+  try {
+    await configManager.init();
+    const config = configManager.get();
+    defaultPath.value = config.defaultPath;
+  } catch (error) {
+    console.error("初始化配置失败:", error);
+    errorMessage.value = `初始化配置失败: ${error}`;
+    showError.value = true;
+  }
 });
 
 const selectFolder = async () => {
+  showError.value = false;
+  errorMessage.value = "";
+
   try {
     const selected = await dialog.open({
       directory: true,
@@ -40,14 +52,23 @@ const selectFolder = async () => {
     }
   } catch (error) {
     console.error("选择文件夹失败:", error);
-    message.error("选择文件夹失败");
+    errorMessage.value = `选择文件夹失败: ${error}`;
+    showError.value = true;
+    message.error("选择文件夹失败，请查看详细信息");
   }
 };
 
 const clearDefaultPath = async () => {
-  defaultPath.value = "";
-  await configManager.update({ defaultPath: "" });
-  message.success("已清除默认文件夹");
+  showError.value = false;
+  try {
+    defaultPath.value = "";
+    await configManager.update({ defaultPath: "" });
+    message.success("已清除默认文件夹");
+  } catch (error) {
+    console.error("清除配置失败:", error);
+    errorMessage.value = `清除配置失败: ${error}`;
+    showError.value = true;
+  }
 };
 </script>
 
@@ -55,6 +76,23 @@ const clearDefaultPath = async () => {
   <div class="settings-container h-full overflow-auto p-6">
     <div class="max-w-4xl mx-auto">
       <h1 class="page-title text-2xl font-bold mb-6">系统设置</h1>
+
+      <n-alert
+        v-if="showError"
+        type="error"
+        :title="errorMessage"
+        class="mb-4"
+        closable
+        @close="showError = false"
+      >
+        <p class="text-sm">{{ errorMessage }}</p>
+        <p class="text-xs mt-2 opacity-70">
+          如果在 Linux 上遇到问题，请确保已安装 xdg-desktop-portal：
+        </p>
+        <code class="text-xs bg-black/10 px-2 py-1 rounded mt-1 inline-block">
+          sudo apt install xdg-desktop-portal-gtk
+        </code>
+      </n-alert>
 
       <n-card title="外观设置" class="settings-card mb-4">
         <div class="space-y-4">

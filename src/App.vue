@@ -14,11 +14,13 @@ onMounted(async () => {
     console.error("Failed to load theme config:", error);
   }
 
-  try {
-    await invoke("close_splashscreen");
-  } catch (error) {
-    console.error("Failed to close splashscreen:", error);
-  }
+  setTimeout(async () => {
+    try {
+      await invoke("close_splashscreen");
+    } catch (error) {
+      console.error("Failed to close splashscreen:", error);
+    }
+  }, 1500);
 });
 </script>
 
