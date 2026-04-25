@@ -32,7 +32,7 @@ jobs:
             jq
 
       - name: 获取应用版本
-        run: echo "APP_VERSION=$(jq -r .version src-tauri/tauri.conf.json)" >> $GITHUB_ENV
+        run: echo "APP_VERSION=$(jq -r .package.version src-tauri/tauri.conf.json)" >> $GITHUB_ENV
 
       - name: Rust 工具链
         uses: dtolnay/rust-toolchain@stable
