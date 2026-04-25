@@ -21,10 +21,13 @@ const selectFolder = async () => {
       title: "选择默认文件夹",
     });
 
-    if (selected && typeof selected === "string") {
-      defaultPath.value = selected;
-      await configManager.update({ defaultPath: selected });
-      message.success("默认文件夹设置成功");
+    if (selected) {
+      const path = Array.isArray(selected) ? selected[0] : selected;
+      if (path && typeof path === "string") {
+        defaultPath.value = path;
+        await configManager.update({ defaultPath: path });
+        message.success("默认文件夹设置成功");
+      }
     }
   } catch (error) {
     console.error("选择文件夹失败:", error);

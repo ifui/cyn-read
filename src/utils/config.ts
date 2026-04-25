@@ -19,7 +19,11 @@ class ConfigManager {
         const configText = await fs.readTextFile(this.configPath);
         this.config = { ...DEFAULT_CONFIG, ...JSON.parse(configText) };
       } else {
-        await fs.createDir(configDir, { recursive: true });
+        try {
+          await fs.createDir(configDir, { recursive: true });
+        } catch (dirError) {
+          console.warn("创建配置目录失败，可能已存在:", dirError);
+        }
         await this.save();
       }
     } catch (error) {

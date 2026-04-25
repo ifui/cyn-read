@@ -203,7 +203,7 @@ defineExpose({
     <n-spin :show="loading">
       <div
         v-if="files.length === 0 && !loading"
-        class="h-full flex items-center justify-center"
+        class="absolute inset-0 flex items-center justify-center"
       >
         <n-empty description="暂无文件" size="large">
           <template #icon>
