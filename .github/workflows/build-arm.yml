@@ -117,10 +117,10 @@ jobs:
             ### 📝 更新说明
           generate_release_notes: true
           files: |
-            linux-arm64-build/*.deb
-            linux-arm64-build/*.AppImage
-            windows-x64-build/*.msi
-            windows-x64-build/*.exe
+            linux-arm64-build/deb/*.deb
+            linux-arm64-build/appimage/*.AppImage
+            windows-x64-build/msi/*.msi
+            windows-x64-build/nsis/*.exe
           fail_on_unmatched_files: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
