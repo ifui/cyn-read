@@ -24,10 +24,12 @@ jobs:
             libwebkit2gtk-4.0-dev \
             build-essential \
             wget \
+            curl  \
             libssl-dev \
             libgtk-3-dev \
             libayatana-appindicator3-dev \
-            librsvg2-dev
+            librsvg2-dev \
+            jq
 
       - name: 获取应用版本
         run: echo "APP_VERSION=$(jq -r .version src-tauri/tauri.conf.json)" >> $GITHUB_ENV
