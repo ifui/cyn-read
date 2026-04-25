@@ -15,10 +15,16 @@
       "all": false,
       "fs": {
         "all": true,
-        "scope": {
-          "allow": ["**"],
-          "deny": []
-        }
+        "readFile": true,
+        "writeFile": true,
+        "readDir": true,
+        "copyFile": true,
+        "createDir": true,
+        "removeDir": true,
+        "removeFile": true,
+        "renameFile": true,
+        "exists": true,
+        "scope": ["$APP", "$APP/**", "$HOME", "$HOME/**", "/**"]
       },
       "dialog": {
         "all": true,
@@ -61,7 +67,8 @@
         "decorations": false,
         "url": "splashscreen.html",
         "label": "splashscreen",
-        "center": true
+        "center": true,
+        "visible": true
       }
     ],
     "security": {
