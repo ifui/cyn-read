@@ -1,0 +1,58 @@
+name: Tauri 构建 (ARM64)
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+jobs:
+  # Linux ARM64
+  build-linux-arm64:
+    runs-on: ubuntu-22.04-arm
+    container:
+      image: arm64v8/ubuntu:20.04 # 拉取 Arm64 架构的 Ubuntu 20.04 容器
+      options: --privileged
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 安装系统依赖
+        run: |
+          apt-get update
+          apt-get install -y \
+            libwebkit2gtk-4.0-dev \
+            build-essential \
+            wget \
+            libssl-dev \
+            libgtk-3-dev \
+            libayatana-appindicator3-dev \
+            librsvg2-dev
+
+      - name: 获取应用版本
+        run: echo "APP_VERSION=$(jq -r .version src-tauri/tauri.conf.json)" >> $GITHUB_ENV
+
+      - name: Rust 工具链
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: 安装依赖 & 构建
+        run: |
+          npm install -g pnpm
+          pnpm install
+          pnpm tauri build
+
+      # 上传 deb
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux-arm64-v${{ env.APP_VERSION }}.deb
+          path: src-tauri/target/release/bundle/deb/*.deb
+
+      # 上传 AppImage
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux-arm64-v${{ env.APP_VERSION }}.AppImage
+          path: src-tauri/target/release/bundle/appimage/*.AppImage
