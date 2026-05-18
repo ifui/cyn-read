@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted } from "vue";
+import { invoke } from "@tauri-apps/api/tauri";
 import { darkTheme } from "naive-ui";
 import { useThemeStore } from "./stores/themeStore";
 import DefaultLayout from "./layout/default/index.vue";
@@ -11,6 +12,12 @@ onMounted(async () => {
     await themeStore.loadThemeFromConfig();
   } catch (error) {
     console.error("Failed to load theme config:", error);
+  }
+
+  try {
+    await invoke("close_splashscreen");
+  } catch (error) {
+    console.error("Failed to close splashscreen:", error);
   }
 });
 </script>

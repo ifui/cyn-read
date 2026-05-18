@@ -374,11 +374,6 @@ defineExpose({
 .hover-selected:hover {
   border-color: var(--color-accent);
   box-shadow: 0 4px 12px var(--color-shadow);
-  transform: scale(1.02);
-}
-
-.file-list-item.hover-selected:hover {
-  transform: translateX(4px);
 }
 
 .selected-file {

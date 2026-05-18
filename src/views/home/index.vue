@@ -23,10 +23,11 @@ const handleSearch = () => {
 
       <n-input-group>
         <n-input
+          class="pl-3"
           v-model:value="searchKeyword"
           type="text"
           size="large"
-          placeholder="搜索文档..."
+          placeholder="搜你想搜..."
           clearable
           round
           @keyup.enter="handleSearch"
