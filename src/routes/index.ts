@@ -1,19 +1,36 @@
 import { createMemoryHistory, createRouter } from "vue-router";
 
-import Home from "../views/home/index.vue";
-import AboutView from "../views/about/index.vue";
-import DocumentsView from "../views/documents/index.vue";
-import SettingsView from "../views/settings/index.vue";
-import OcrView from "../views/ocr/index.vue";
-import PdfEditorView from "../views/pdf-editor/index.vue";
-
 const routes = [
-  { path: "/", component: Home },
-  { path: "/about", component: AboutView },
-  { path: "/documents", component: DocumentsView },
-  { path: "/settings", component: SettingsView },
-  { path: "/ocr", component: OcrView },
-  { path: "/pdf-editor", component: PdfEditorView },
+  { 
+    path: "/", 
+    component: () => import("../views/home/index.vue"),
+    name: "home"
+  },
+  { 
+    path: "/about", 
+    component: () => import("../views/about/index.vue"),
+    name: "about"
+  },
+  { 
+    path: "/documents", 
+    component: () => import("../views/documents/index.vue"),
+    name: "documents"
+  },
+  { 
+    path: "/settings", 
+    component: () => import("../views/settings/index.vue"),
+    name: "settings"
+  },
+  { 
+    path: "/ocr", 
+    component: () => import("../views/ocr/index.vue"),
+    name: "ocr"
+  },
+  { 
+    path: "/pdf-editor", 
+    component: () => import("../views/pdf-editor/index.vue"),
+    name: "pdf-editor"
+  },
 ];
 
 const router = createRouter({
