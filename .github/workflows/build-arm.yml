@@ -42,6 +42,7 @@ jobs:
       - name: 构建 Linux ARM64
         run: |
           npm install -g pnpm
+          pnpm approve-builds
           pnpm install
           pnpm tauri build
 
@@ -71,6 +72,7 @@ jobs:
       - name: 构建 Windows
         run: |
           npm install -g pnpm
+          pnpm approve-builds
           pnpm install
           pnpm tauri build
 
