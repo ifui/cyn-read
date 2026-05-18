@@ -42,8 +42,7 @@ jobs:
       - name: 构建 Linux ARM64
         run: |
           npm install -g pnpm
-          pnpm approve-builds
-          pnpm install
+          pnpm install --ignore-scripts=false --unsafe-perm
           pnpm tauri build
 
       - name: 上传产物
@@ -72,8 +71,7 @@ jobs:
       - name: 构建 Windows
         run: |
           npm install -g pnpm
-          pnpm approve-builds
-          pnpm install
+          pnpm install --ignore-scripts=false --unsafe-perm
           pnpm tauri build
 
       - name: 上传 Windows 产物
