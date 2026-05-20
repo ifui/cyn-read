@@ -15,7 +15,7 @@ export const useThemeStore = defineStore("theme", () => {
       primaryColorPressed: isDark.value ? "#b89555" : "#3a3a3a",
       primaryColorSuppl: isDark.value ? "#c9a86c" : "#5c5c5c",
       fontFamily:
-        "'Noto Serif SC', 'Source Han Serif SC', 'Microsoft YaHei', serif",
+        "'Microsoft YaHei', 'PingFang SC', 'Hiragino Sans GB', sans-serif",
       borderRadius: "6px",
       borderRadiusSmall: "4px",
       textColorBase: isDark.value ? "#e8e4dc" : "#2c2c2c",

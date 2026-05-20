@@ -6,7 +6,7 @@ export default defineConfig(async () => ({
   plugins: [vue(), tailwindcss()],
 
   clearScreen: false,
-  
+
   server: {
     port: 1420,
     strictPort: true,
@@ -19,9 +19,9 @@ export default defineConfig(async () => ({
     rollupOptions: {
       output: {
         manualChunks: {
-          'naive-ui': ['naive-ui'],
-          'vue-vendor': ['vue', 'vue-router', 'pinia'],
-          'remixicon': ['remixicon/fonts/remixicon.css'],
+          "naive-ui": ["naive-ui"],
+          "vue-vendor": ["vue", "vue-router", "pinia"],
+          remixicon: ["remixicon/fonts/remixicon.css"],
         },
       },
     },
