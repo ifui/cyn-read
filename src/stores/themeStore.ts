@@ -1,10 +1,11 @@
 import { defineStore } from "pinia";
 import { ref, computed, watch } from "vue";
-import { configManager } from "../utils/config";
-import type { ThemeMode } from "../types/config";
+import { useConfigStore } from "./config";
+import { AppConfig } from "@/types/config";
 
 export const useThemeStore = defineStore("theme", () => {
-  const themeMode = ref<ThemeMode>("light");
+  const configStore = useConfigStore();
+  const themeMode = ref<AppConfig["themeMode"]>("light");
 
   const isDark = computed(() => themeMode.value === "dark");
 
@@ -148,14 +149,14 @@ export const useThemeStore = defineStore("theme", () => {
     await saveThemeToConfig();
   };
 
-  const setTheme = async (mode: ThemeMode) => {
+  const setTheme = async (mode: AppConfig["themeMode"]) => {
     themeMode.value = mode;
     await saveThemeToConfig();
   };
 
   const saveThemeToConfig = async () => {
     try {
-      await configManager.update({ themeMode: themeMode.value });
+      await configStore.update({ themeMode: themeMode.value });
     } catch (error) {
       console.error("保存主题配置失败:", error);
     }
@@ -163,8 +164,7 @@ export const useThemeStore = defineStore("theme", () => {
 
   const loadThemeFromConfig = async () => {
     try {
-      await configManager.init();
-      const config = configManager.get();
+      const config = configStore.config;
       themeMode.value = config.themeMode;
     } catch (error) {
       console.error("加载主题配置失败:", error);

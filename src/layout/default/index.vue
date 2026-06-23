@@ -1,6 +1,15 @@
 <script setup lang="ts">
 import LayoutSider from "./LayoutSider.vue";
 import LayoutFooter from "./LayoutFooter.vue";
+import { onMounted } from "vue";
+import { useConfigStore } from "@/stores/config.ts";
+
+const { init } = useConfigStore();
+
+// 初始化配置
+onMounted(async () => {
+  await init();
+});
 </script>
 
 <template>

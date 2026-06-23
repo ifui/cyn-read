@@ -1,35 +1,40 @@
 import { createMemoryHistory, createRouter } from "vue-router";
 
 const routes = [
-  { 
-    path: "/", 
+  {
+    path: "/",
     component: () => import("../views/home/index.vue"),
-    name: "home"
+    name: "home",
   },
-  { 
-    path: "/about", 
+  {
+    path: "/about",
     component: () => import("../views/about/index.vue"),
-    name: "about"
+    name: "about",
   },
-  { 
-    path: "/documents", 
+  {
+    path: "/documents",
     component: () => import("../views/documents/index.vue"),
-    name: "documents"
+    name: "documents",
   },
-  { 
-    path: "/settings", 
+  {
+    path: "/settings",
     component: () => import("../views/settings/index.vue"),
-    name: "settings"
+    name: "settings",
   },
-  { 
-    path: "/ocr", 
+  {
+    path: "/ocr",
     component: () => import("../views/ocr/index.vue"),
-    name: "ocr"
+    name: "ocr",
   },
-  { 
-    path: "/pdf-editor", 
+  {
+    path: "/pdf-editor",
     component: () => import("../views/pdf-editor/index.vue"),
-    name: "pdf-editor"
+    name: "pdf-editor",
+  },
+  {
+    path: "/trash",
+    component: () => import("../views/trash/index.vue"),
+    name: "trash",
   },
 ];
 

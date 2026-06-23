@@ -8,6 +8,7 @@ export interface ReadDirOptions {
   search?: string;
 }
 
+// 读取目录下的所有文件和子目录
 export async function readDirectory(
   options: ReadDirOptions,
 ): Promise<FileItem[]> {
@@ -59,6 +60,7 @@ export async function readDirectory(
   }
 }
 
+// 获取文件扩展名
 async function getFileExtension(filename: string): Promise<string> {
   try {
     const ext = await extname(filename);
@@ -68,6 +70,7 @@ async function getFileExtension(filename: string): Promise<string> {
   }
 }
 
+// 格式化文件大小
 export function formatFileSize(bytes: number): string {
   if (bytes === 0) return "0 B";
 

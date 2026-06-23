@@ -28,32 +28,32 @@ const menuOptions = ref([
     key: "/documents",
     icon: renderIcon("ri-folder-3-line"),
   },
-  {
-    type: "divider",
-    key: "d2",
-  },
-  {
-    label: "工具箱",
-    key: "/tools",
-    icon: renderIcon("ri-tools-line"),
-    children: [
-      {
-        label: "PDF 编辑",
-        key: "/pdf-editor",
-        icon: renderIcon("ri-file-edit-line"),
-      },
-      {
-        label: "文字识别",
-        key: "/ocr",
-        icon: renderIcon("ri-text"),
-      },
-      {
-        label: "图片处理",
-        key: "/image-editor",
-        icon: renderIcon("ri-image-edit-line"),
-      },
-    ],
-  },
+  // {
+  //   type: "divider",
+  //   key: "d2",
+  // },
+  // {
+  //   label: "工具箱",
+  //   key: "/tools",
+  //   icon: renderIcon("ri-tools-line"),
+  //   children: [
+  //     {
+  //       label: "PDF 编辑",
+  //       key: "/pdf-editor",
+  //       icon: renderIcon("ri-file-edit-line"),
+  //     },
+  //     {
+  //       label: "文字识别",
+  //       key: "/ocr",
+  //       icon: renderIcon("ri-text"),
+  //     },
+  //     {
+  //       label: "图片处理",
+  //       key: "/image-editor",
+  //       icon: renderIcon("ri-image-edit-line"),
+  //     },
+  //   ],
+  // },
   {
     type: "divider",
     key: "d3",
@@ -101,9 +101,12 @@ const handleUpdateValue = (key: string) => {
         class="theme-toggle-btn"
       >
         <template #icon>
-          <i :class="themeStore.isDark ? 'ri-sun-line' : 'ri-moon-line'" class="text-lg"></i>
+          <i
+            :class="themeStore.isDark ? 'ri-sun-line' : 'ri-moon-line'"
+            class="text-lg"
+          ></i>
         </template>
-        {{ themeStore.isDark ? '浅色模式' : '深色模式' }}
+        {{ themeStore.isDark ? "浅色模式" : "深色模式" }}
       </n-button>
     </div>
   </div>
@@ -119,7 +122,7 @@ const handleUpdateValue = (key: string) => {
 }
 
 .theme-toggle-btn {
-  font-family: 'Noto Serif SC', serif;
+  font-family: "Noto Serif SC", serif;
   color: var(--color-text-secondary);
 }
 

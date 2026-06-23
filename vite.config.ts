@@ -1,6 +1,7 @@
 import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
 import tailwindcss from "@tailwindcss/vite";
+import { resolve } from "path";
 
 export default defineConfig(async () => ({
   plugins: [vue(), tailwindcss()],
@@ -26,5 +27,12 @@ export default defineConfig(async () => ({
       },
     },
     chunkSizeWarningLimit: 1000,
+  },
+
+  resolve: {
+    alias: {
+      // @ 指向 src
+      "@": resolve(__dirname, "src"),
+    },
   },
 }));
