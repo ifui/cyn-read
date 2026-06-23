@@ -27,18 +27,13 @@ const selectFolder = async () => {
     });
 
     if (selectedPath && typeof selectedPath === "string") {
-      const isEmpty = await isPathEmpty(selectedPath);
-      if (isEmpty) {
-        await configStore.update({
-          document: {
-            ...configStore.config.document,
-            defaultPath: selectedPath,
-          },
-        });
-        message.success("配置默认路径成功");
-      } else {
-        message.warning("请选择一个空的文件夹作为文档管理路径");
-      }
+      await configStore.update({
+        document: {
+          ...configStore.config.document,
+          defaultPath: selectedPath,
+        },
+      });
+      message.success("配置默认路径成功");
     }
   } catch (error) {
     console.error("选择文件夹失败:", error);
@@ -56,12 +51,6 @@ const clearDefaultPath = async () => {
     console.error("清除配置失败:", error);
     message.error("清除配置失败");
   }
-};
-
-// 判断文件路径是否为空
-const isPathEmpty = async (path: string) => {
-  const files = await readDirectory({ path });
-  return files.length === 0;
 };
 </script>
 
@@ -136,17 +125,13 @@ const isPathEmpty = async (path: string) => {
                   <i class="ri-folder-line text-gray-400"></i>
                 </template>
               </n-input>
-              <n-button type="secondary" @click="selectFolder">
+              <n-button secondary @click="selectFolder">
                 <template #icon>
                   <i class="ri-folder-add-line"></i>
                 </template>
                 选择
               </n-button>
-              <n-button
-                v-if="defaultPath"
-                type="secondary"
-                @click="clearDefaultPath"
-              >
+              <n-button v-if="defaultPath" secondary @click="clearDefaultPath">
                 清除
               </n-button>
             </div>

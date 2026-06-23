@@ -36,6 +36,11 @@ const routes = [
     component: () => import("../views/trash/index.vue"),
     name: "trash",
   },
+  {
+    path: "/seat-table",
+    component: () => import("../views/seat-table/index.vue"),
+    name: "seat-table",
+  },
 ];
 
 const router = createRouter({

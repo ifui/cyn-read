@@ -32,36 +32,32 @@ const menuOptions = ref([
   //   type: "divider",
   //   key: "d2",
   // },
-  // {
-  //   label: "工具箱",
-  //   key: "/tools",
-  //   icon: renderIcon("ri-tools-line"),
-  //   children: [
-  //     {
-  //       label: "PDF 编辑",
-  //       key: "/pdf-editor",
-  //       icon: renderIcon("ri-file-edit-line"),
-  //     },
-  //     {
-  //       label: "文字识别",
-  //       key: "/ocr",
-  //       icon: renderIcon("ri-text"),
-  //     },
-  //     {
-  //       label: "图片处理",
-  //       key: "/image-editor",
-  //       icon: renderIcon("ri-image-edit-line"),
-  //     },
-  //   ],
-  // },
   {
-    type: "divider",
-    key: "d3",
-  },
-  {
-    label: "回收站",
-    key: "/trash",
-    icon: renderIcon("ri-delete-bin-line"),
+    label: "工具箱",
+    key: "/tools",
+    icon: renderIcon("ri-tools-line"),
+    children: [
+      // {
+      //   label: "PDF 编辑",
+      //   key: "/pdf-editor",
+      //   icon: renderIcon("ri-file-edit-line"),
+      // },
+      // {
+      //   label: "文字识别",
+      //   key: "/ocr",
+      //   icon: renderIcon("ri-text"),
+      // },
+      // {
+      //   label: "图片处理",
+      //   key: "/image-editor",
+      //   icon: renderIcon("ri-image-edit-line"),
+      // },
+      {
+        label: "排座位表",
+        key: "/seat-table",
+        icon: renderIcon("ri-table-line"),
+      },
+    ],
   },
   {
     type: "divider",

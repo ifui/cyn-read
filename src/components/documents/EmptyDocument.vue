@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { useConfigStore } from "@/stores/config";
-import { readDirectory } from "@/utils/fileSystem";
 import { open } from "@tauri-apps/api/dialog";
 import { useMessage } from "naive-ui";
 
@@ -16,27 +15,18 @@ const selectFolder = async () => {
     });
 
     if (selectedPath && typeof selectedPath === "string") {
-      const isEmpty = await isPathEmpty(selectedPath);
-      if (isEmpty) {
-        await configStore.update({
-          document: {
-            defaultPath: selectedPath,
-            trashPath: "trash",
-          },
-        });
-        message.success("配置默认路径成功");
-      }
+      await configStore.update({
+        document: {
+          defaultPath: selectedPath,
+          trashPath: "trash",
+        },
+      });
+      message.success("配置默认路径成功");
     }
   } catch (error) {
     console.error("选择文件夹失败:", error);
     message.error("配置默认路径失败");
   }
-};
-
-// 判断文件路径是否为空
-const isPathEmpty = async (path: string) => {
-  const files = await readDirectory({ path });
-  return files.length === 0;
 };
 </script>
 
