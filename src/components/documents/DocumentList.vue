@@ -8,7 +8,7 @@ const defaultPath = computed(() => configStore.config.document.defaultPath);
 </script>
 
 <template>
-  <div>文档管理默认路径: {{ defaultPath }}</div>
+  <div>文档管理默认路径: {{ defaultPath }}，该功能开发中</div>
 </template>
 
 <style scoped></style>

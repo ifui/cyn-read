@@ -53,7 +53,7 @@ const menuOptions = ref([
       //   icon: renderIcon("ri-image-edit-line"),
       // },
       {
-        label: "排座位表",
+        label: "会场排座",
         key: "/seat-table",
         icon: renderIcon("ri-table-line"),
       },

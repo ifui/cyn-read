@@ -11,7 +11,6 @@ import {
 import { useThemeStore } from "../../stores/themeStore";
 import { useConfigStore } from "@/stores/config";
 import { open } from "@tauri-apps/api/dialog";
-import { readDirectory } from "@/utils/fileSystem";
 
 const message = useMessage();
 const themeStore = useThemeStore();
