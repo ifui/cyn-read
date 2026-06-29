@@ -18,11 +18,12 @@ import {
   useMessage,
   useDialog,
 } from "naive-ui";
-import { utils, writeFile } from "xlsx";
+import { utils, write } from "xlsx";
 import { storeToRefs } from "pinia";
 import { useSeatTableStore } from "../store";
 import { useImportExport } from "../composables/useImportExport";
 import { useSeatTablePrint } from "../composables/useSeatTablePrint";
+import { saveBlob } from "@/utils/saveFile";
 import type { ArrangeStrategy } from "../types";
 
 const store = useSeatTableStore();
@@ -73,7 +74,7 @@ const handleAutoArrange = () => {
   });
 };
 
-const handleExportPersons = () => {
+const handleExportPersons = async () => {
   const data = store.persons.map((p) => ({
     姓名: p.name,
     部门: store.getDeptFullName(p.department),
@@ -85,13 +86,20 @@ const handleExportPersons = () => {
   const ws = utils.json_to_sheet(data);
   const wb = utils.book_new();
   utils.book_append_sheet(wb, ws, "人员列表");
-  writeFile(wb, `人员清单-${store.formatTime(Date.now()).slice(0, 10)}.xlsx`);
-  message.success("人员清单已导出");
+  const buf = write(wb, { bookType: "xlsx", type: "array" });
+  const blob = new Blob([buf], {
+    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  });
+  const filename = `人员清单-${store.formatTime(Date.now()).slice(0, 10)}.xlsx`;
+  const r = await saveBlob(blob, filename, "导出人员清单");
+  if (r.ok) message.success("人员清单已导出");
 };
 
-const handleExportLayout = () => {
-  store.exportLayoutJSON();
-  message.success("布局已导出");
+const handleExportLayout = async () => {
+  const r = await store.exportLayoutJSON();
+  if (r.ok) message.success("布局已导出");
+  else if (r.reason && r.reason !== "已取消保存")
+    message.error(r.reason || "导出失败");
 };
 
 /** 重置画布视图（zoom/pan）+ 等两帧让 DOM 更新
@@ -110,7 +118,11 @@ async function resetCanvasView() {
  * - 填了 = 套上 A4 版式：标题 + 副标题 + 画布
  * 返回：用户是否点了"确定"、最终标题/副标题
  */
-function promptForHeader(): Promise<{ go: boolean; title: string; meta: string }> {
+function promptForHeader(): Promise<{
+  go: boolean;
+  title: string;
+  meta: string;
+}> {
   return new Promise((resolve) => {
     const t = ref(lastTitle.value);
     const m = ref(lastMeta.value);

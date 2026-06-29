@@ -28,6 +28,7 @@ import {
   STORAGE_KEY,
   ZOOM_STEP,
 } from "./constants";
+import { saveText } from "@/utils/saveFile";
 
 /* ============================================================
  * 工具
@@ -1176,7 +1177,7 @@ export const useSeatTableStore = defineStore("seatTable", () => {
   );
 
   /* ---------- 导出/导入 JSON 布局 ---------- */
-  const exportLayoutJSON = () => {
+  const exportLayoutJSON = async () => {
     const snapshot: LayoutSnapshot = {
       rows: rows.value,
       cols: cols.value,
@@ -1184,11 +1185,9 @@ export const useSeatTableStore = defineStore("seatTable", () => {
       seats: cloneDeep(seats.value),
       version: "2.0",
     };
-    const blob = new Blob([JSON.stringify(snapshot, null, 2)], {
-      type: "application/json",
-    });
-    downloadBlob(blob, `会场布局-${formatTime(Date.now()).slice(0, 10)}.json`);
-    return { ok: true };
+    const text = JSON.stringify(snapshot, null, 2);
+    const filename = `会场布局-${formatTime(Date.now()).slice(0, 10)}.json`;
+    return await saveText(text, filename, "导出会场布局", "application/json");
   };
 
   const importLayoutJSON = async (file: File) => {

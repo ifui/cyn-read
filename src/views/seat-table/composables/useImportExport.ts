@@ -5,8 +5,9 @@
  */
 import { ref } from "vue";
 import { useMessage } from "naive-ui";
-import { utils, read, writeFile } from "xlsx";
+import { utils, read, write } from "xlsx";
 import { useSeatTableStore } from "../store";
+import { saveBlob } from "@/utils/saveFile";
 import type { Level, PersonStatus } from "../types";
 
 const uid = () =>
@@ -173,7 +174,7 @@ export function useImportExport() {
     input.value = "";
   };
 
-  const downloadExcelTemplate = () => {
+  const downloadExcelTemplate = async () => {
     const ws = utils.aoa_to_sheet([
       ["姓名", "部门", "级别", "职务", "状态", "备注"],
       ["张三", "办公室/秘书科", "正处级", "主任", "参会", ""],
@@ -182,8 +183,12 @@ export function useImportExport() {
     ]);
     const wb = utils.book_new();
     utils.book_append_sheet(wb, ws, "人员列表");
-    writeFile(wb, "人员导入模板.xlsx");
-    message.success("模板已下载");
+    const buf = write(wb, { bookType: "xlsx", type: "array" });
+    const blob = new Blob([buf], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+    const r = await saveBlob(blob, "人员导入模板.xlsx", "下载人员导入模板");
+    if (r.ok) message.success("模板已下载");
   };
 
   return {

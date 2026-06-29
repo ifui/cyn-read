@@ -11,6 +11,7 @@
  */
 import { ref } from "vue";
 import { useSeatTableStore } from "../store";
+import { saveBlob } from "@/utils/saveFile";
 
 /* A4 横向：297mm × 210mm @ 96dpi */
 const A4_W = 1123;
@@ -121,11 +122,8 @@ export function useSeatTablePrint() {
       const dataURL = await captureCanvasDataURL();
       if (!dataURL) return { ok: false, reason: "画布未就绪" };
       const blob = await (await fetch(dataURL)).blob();
-      downloadBlob(
-        blob,
-        `座位图-${store.formatTime(Date.now()).slice(0, 10)}.png`,
-      );
-      return { ok: true };
+      const filename = `座位图-${store.formatTime(Date.now()).slice(0, 10)}.png`;
+      return await saveBlob(blob, filename);
     } catch (err) {
       console.error(err);
       return { ok: false, reason: "导出失败" };
@@ -279,11 +277,11 @@ export function useSeatTablePrint() {
       const dataURL = await captureA4DataURL(opts);
       if (!dataURL) return { ok: false, reason: "画布未就绪" };
       const blob = await (await fetch(dataURL)).blob();
-      downloadBlob(
-        blob,
-        `座位图-${store.formatTime(Date.now()).slice(0, 10)}.png`,
-      );
-      return { ok: true };
+      const title = (opts.title || "").trim();
+      const filename = title
+        ? `${title}-${store.formatTime(Date.now()).slice(0, 10)}.png`
+        : `座位图-${store.formatTime(Date.now()).slice(0, 10)}.png`;
+      return await saveBlob(blob, filename, "保存导出的图片");
     } catch (err) {
       console.error(err);
       return { ok: false, reason: "导出失败" };
@@ -370,13 +368,4 @@ function escapeHtml(s: string): string {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#39;");
-}
-
-function downloadBlob(blob: Blob, filename: string) {
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  a.click();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
