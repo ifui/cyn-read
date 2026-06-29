@@ -111,6 +111,8 @@ const handleRemoveLevel = (l: Level) => {
             @update:value="
               (v: number | null) => v && store.initCanvas(v, cols, true)
             "
+            :show-button="false"
+            readonly
           />
           <n-button-group size="tiny">
             <n-button @click="store.changeRows(-1)">
@@ -132,6 +134,8 @@ const handleRemoveLevel = (l: Level) => {
             @update:value="
               (v: number | null) => v && store.initCanvas(rows, v, true)
             "
+            :show-button="false"
+            readonly
           />
           <n-button-group size="tiny">
             <n-button @click="store.changeCols(-1)">
