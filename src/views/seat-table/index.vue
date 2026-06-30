@@ -252,6 +252,9 @@ watch(
 onMounted(() => {
   const loaded = store.loadFromStorage();
   if (!loaded) store.initCanvas();
+  // 防御性：清理历史遗留的越界格子（幽灵行/列）。
+  // 这一步幂等，没脏数据时啥也不做。
+  store.cleanupOutOfBoundsCells();
 });
 </script>
 

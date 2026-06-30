@@ -178,7 +178,17 @@ export const useSeatTableStore = defineStore("seatTable", () => {
     for (const c of cells.value) m.set(`${c.row}_${c.col}`, c);
     return m;
   });
-  const masterCells = computed(() => cells.value.filter((c) => c.master));
+  const masterCells = computed(() =>
+    cells.value.filter(
+      (c) =>
+        c.master &&
+        // 防御性：脏数据里可能有 row/col 超出当前网格的格子
+        // （老版本导出/导入遗留，或历史 bug 残留）。
+        // 渲染时只保留网格内的，避免出现底部/右侧的"幽灵行"。
+        c.row < rows.value &&
+        c.col < cols.value,
+    ),
+  );
   const personMap = computed(() => {
     const m = new Map<string, Person>();
     for (const p of persons.value) m.set(p.id, p);
@@ -1114,19 +1124,29 @@ export const useSeatTableStore = defineStore("seatTable", () => {
     rows.value = data.rows;
     cols.value = data.cols;
     // 兼容老数据：仅保留必要字段，丢弃已废弃的 tableType / tableGroupId
-    cells.value = data.cells.map((c: any) => ({
-      id: c.id,
-      row: c.row,
-      col: c.col,
-      rowSpan: c.rowSpan || 1,
-      colSpan: c.colSpan || 1,
-      master: c.master !== false,
-      masterId: c.masterId,
-      text: c.text || "",
-      bgColor: c.bgColor || "",
-      textColor: c.textColor || "",
-      type: c.type || "seat",
-    }));
+    cells.value = data.cells
+      .map((c: any) => ({
+        id: c.id,
+        row: c.row,
+        col: c.col,
+        rowSpan: c.rowSpan || 1,
+        colSpan: c.colSpan || 1,
+        master: c.master !== false,
+        masterId: c.masterId,
+        text: c.text || "",
+        bgColor: c.bgColor || "",
+        textColor: c.textColor || "",
+        type: c.type || "seat",
+      }))
+      // 关键：把"超出当前网格"的格子（包括 master 和 slave）一律丢掉。
+      // 否则 masterCells 会渲染出 grid 之外的幽灵行/列，污染视图和性能。
+      .filter(
+        (c: any) =>
+          c.row < data.rows &&
+          c.col < data.cols &&
+          c.row + (c.rowSpan || 1) <= data.rows &&
+          c.col + (c.colSpan || 1) <= data.cols,
+      );
     // 人员兼容老数据：补充 status 字段，去除老字段 phone/email
     persons.value = (data.persons || []).map((p: any, idx: number) => {
       const next: any = {
@@ -1167,6 +1187,35 @@ export const useSeatTableStore = defineStore("seatTable", () => {
       desc: l.desc || "",
     }));
     return true;
+  };
+
+  /**
+   * 清理超出当前网格的格子。
+   * 老数据 / 历史 bug 残留的 cell-17-5 之类的"幽灵行"会被一次性清理掉。
+   * applySnapshot 加载时会自动过滤；这里也暴露成 action 供手动触发。
+   */
+  const cleanupOutOfBoundsCells = () => {
+    const before = cells.value.length;
+    cells.value = cells.value.filter(
+      (c) =>
+        c.row < rows.value &&
+        c.col < cols.value &&
+        c.row + (c.rowSpan || 1) <= rows.value &&
+        c.col + (c.colSpan || 1) <= cols.value,
+    );
+    // 同步清理指向幽灵 cell 的座位记录
+    const validIds = new Set(cells.value.map((c) => c.id));
+    seats.value = seats.value.filter((s) => {
+      if (!validIds.has(s.cellId)) return false;
+      const cell = cells.value.find((c) => c.id === s.cellId);
+      return cell && cell.type === "seat";
+    });
+    const removed = before - cells.value.length;
+    if (removed > 0) {
+      console.info(`[seat-table] 清理了 ${removed} 个越界格子`);
+      rebuildSeats();
+      persist();
+    }
   };
 
   // 监听变化自动保存
@@ -1330,6 +1379,8 @@ export const useSeatTableStore = defineStore("seatTable", () => {
     /* persistence */
     persist,
     loadFromStorage,
+    /* 维护 */
+    cleanupOutOfBoundsCells,
     /* utils */
     formatTime,
   };

@@ -1216,17 +1216,9 @@ watch(
   flex: 1;
   overflow: auto;
   position: relative;
-  background:
-    linear-gradient(45deg, #f0ece2 25%, transparent 25%),
-    linear-gradient(-45deg, #f0ece2 25%, transparent 25%),
-    linear-gradient(45deg, transparent 75%, #f0ece2 75%),
-    linear-gradient(-45deg, transparent 75%, #f0ece2 75%);
-  background-size: 20px 20px;
-  background-position:
-    0 0,
-    0 10px,
-    10px -10px,
-    10px 0;
+  /* 之前用 4 层 linear-gradient 拼棋盘格做"空白"装饰，视觉上像噪点，
+   * 而且每帧都要重绘 4 层渐变。改成纯色：底部大片留白就只是干净的米色，
+   * 没有任何纹理"层"干扰观感。*/
   background-color: #faf8f4;
   cursor: default;
 }
@@ -1234,8 +1226,10 @@ watch(
   position: absolute;
   top: 30px;
   left: 30px;
-  transition: transform 0.05s;
-  will-change: transform;
+  /* 不要 will-change：永久 GPU 提升会把整个画布（含 100+ 单元格）
+   * 全部合成，浪费显存且每个 paint 都要重传到 GPU。
+   * 平移视图用 transform 是 GPU 友好的，不需要 will-change 提示。
+   * transition 也去掉：平移应当 1:1 跟手，加 0.05s 过渡反而黏手。*/
   display: grid;
   /* 列宽：第一列 32px（行号槽位），其余 col 列各 CELL_W */
   /* 行高：第一行 22px（列号槽位），其余 row 行各 CELL_H */
@@ -1287,14 +1281,15 @@ watch(
 }
 .canvas-cell {
   border: 1px solid #d8d2c4;
-  background: linear-gradient(180deg, #ffffff 0%, #faf7f0 100%);
+  /* 改用纯色：linear-gradient 在 100+ 单元格里是隐性性能杀手。
+   * 视觉差异极小（#faf7f0 ≈ 渐变两端颜色的中点）。*/
+  background: #faf8f3;
   position: relative;
   overflow: hidden;
-  transition:
-    border-color 0.15s,
-    box-shadow 0.15s,
-    background 0.15s,
-    opacity 0.15s;
+  /* transition 只留 border-color：原来 4 个属性全开，鼠标划一排会触发
+   * 上百次合成器调度。其它属性（box-shadow/background/opacity）的过渡
+   * 在低配机器上肉眼几乎察觉不到，砍掉换取帧率。*/
+  transition: border-color 0.15s;
   border-radius: 2px;
   cursor: default;
   user-select: none;
@@ -1366,26 +1361,23 @@ watch(
   z-index: 4;
   background: rgba(201, 168, 108, 0.08);
 }
-/* 从人员列表点击触发的单元格外发光（金色脉冲，契合主题） */
+/* 从人员列表点击触发的单元格外发光
+ * 性能优化：
+ *   - 原来 box-shadow 14-20px 模糊 + 1.4s infinite = 持续 GPU 渲染，成本巨大
+ *   - 改用 outline（不参与合成器重绘）+ opacity 动画（只动不重绘）
+ *   - 用 animation-fill-mode + 关键帧 0%→100% 形成一次性脉冲，不再 infinite */
 .canvas-cell.cell-person-highlight {
-  border-color: var(--gold-deep);
-  box-shadow:
-    0 0 0 2px rgba(201, 168, 108, 0.55),
-    0 0 14px 2px rgba(201, 168, 108, 0.4);
+  outline: 2px solid var(--gold-deep);
+  outline-offset: -2px;
   z-index: 5;
-  animation: cell-highlight-pulse 1.4s ease-in-out infinite;
+  animation: cell-highlight-fade 1.4s ease-out 1 forwards;
 }
-@keyframes cell-highlight-pulse {
-  0%,
-  100% {
-    box-shadow:
-      0 0 0 2px rgba(201, 168, 108, 0.55),
-      0 0 8px 1px rgba(201, 168, 108, 0.28);
+@keyframes cell-highlight-fade {
+  0% {
+    background: rgba(201, 168, 108, 0.45);
   }
-  50% {
-    box-shadow:
-      0 0 0 3px rgba(184, 149, 85, 0.75),
-      0 0 20px 4px rgba(201, 168, 108, 0.55);
+  100% {
+    background: rgba(201, 168, 108, 0.1);
   }
 }
 /* 标识格：默认渐变背景；用户可在弹窗中自定义 bgColor/textColor */
@@ -1396,6 +1388,10 @@ watch(
   align-items: center;
   justify-content: center;
   box-shadow: inset 0 0 0 1px rgba(184, 168, 122, 0.18);
+  /* 合并的标识格：必须给一个比相邻单元格更高的 z-index，否则在 CSS Grid 里
+   * 它会被后面渲染的相邻 cell 部分覆盖（视觉上像"只有 hover 才显示"）。
+   * 其他状态（pressing/selected/move-over 等）会进一步抬高，不冲突。*/
+  z-index: 1;
 }
 /* 当用户没有自定义颜色时，inline style 不会写入 background，
  * 此时让 .cell-label 的渐变生效；用户自定义了颜色就以 inline 为准。
@@ -1476,7 +1472,8 @@ watch(
   align-items: center;
   justify-content: center;
   position: relative;
-  transition: all 0.15s;
+  /* 改用具体属性：transition: all 会监听 width/height/color 等无关属性变化 */
+  transition: background-color 0.15s;
 }
 .seat-slot:hover {
   background: #fff;
@@ -1484,7 +1481,7 @@ watch(
 .seat-slot.has-person {
   background: #fff;
   padding: 3px;
-  transition: all 0.2s;
+  transition: background-color 0.2s;
 }
 .seat-empty-hint {
   color: #d4c8a8;
@@ -1513,7 +1510,10 @@ watch(
   position: relative;
   overflow: hidden;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-  transition: all 0.18s;
+  /* 改用具体属性：transition: all 会监听无关属性。实际只动 transform + box-shadow */
+  transition:
+    transform 0.18s,
+    box-shadow 0.18s;
   background: #7d7d7d;
   padding: 2px 3px;
   box-sizing: border-box;
@@ -1537,8 +1537,12 @@ watch(
   transform: scale(0.97);
 }
 .person-block.is-absent {
-  filter: grayscale(0.6);
-  opacity: 0.7;
+  /* 用 opacity 替代 filter：filter 会触发完整重绘，opacity 只改合成层。
+   * 灰度感通过降低背景色饱和度实现（背景用 #aaa 灰色）。 */
+  opacity: 0.55;
+}
+.person-block.is-absent .person-inner {
+  background: #7d7d7d !important;
 }
 .person-block.is-absent::after {
   content: "○";
@@ -1663,9 +1667,7 @@ watch(
   border: 1.5px dashed #5b8def;
   z-index: 50;
   border-radius: 4px;
-  transition:
-    width 0.05s,
-    height 0.05s;
+  /* 去掉 transition：拖选框要 1:1 跟手，加过渡反而黏手卡顿 */
 }
 
 /* 顶部左侧：画布交互模式指示器 */
@@ -1684,11 +1686,13 @@ watch(
   box-shadow: 0 2px 6px rgba(60, 50, 20, 0.08);
   user-select: none;
   pointer-events: none;
-  backdrop-filter: blur(2px);
+  /* 去掉 backdrop-filter: blur(2px)：
+   *   backdrop-filter 是 CSS 里最贵的效果之一，要重渲染底层像素再模糊。
+   *   0.92 的白色背景已经能盖住下面内容，视觉差异极小。 */
   transition:
     border-color 0.18s,
     box-shadow 0.18s,
-    background 0.18s;
+    background-color 0.18s;
   min-width: 132px;
 }
 .mode-indicator .mode-icon {

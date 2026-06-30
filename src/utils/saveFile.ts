@@ -21,7 +21,9 @@ function fallbackDownload(blob: Blob, filename: string) {
 }
 
 /** 文件过滤器：根据扩展名猜一个 name */
-function buildFilters(filename: string): { name: string; extensions: string[] }[] {
+function buildFilters(
+  filename: string,
+): { name: string; extensions: string[] }[] {
   const ext = filename.split(".").pop()?.toLowerCase();
   if (!ext) return [];
   const nameMap: Record<string, string> = {
