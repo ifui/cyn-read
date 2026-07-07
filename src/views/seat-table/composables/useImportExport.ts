@@ -5,7 +5,7 @@
  */
 import { ref } from "vue";
 import { useMessage } from "naive-ui";
-import { utils, read, write } from "xlsx";
+import { utils, read } from "xlsx";
 import { open } from "@tauri-apps/api/dialog";
 import { invoke } from "@tauri-apps/api/tauri";
 import { useSeatTableStore } from "../store";
