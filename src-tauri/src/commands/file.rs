@@ -45,6 +45,12 @@ pub fn read_file_as_bytes(path: String) -> Result<Vec<u8>, String> {
     fs::read(&path).map_err(|e| format!("读取文件失败: {}", e))
 }
 
+/// 读取文件文本内容（用于 CSV 等纯文本，加密系统不加密此类文件）
+#[tauri::command]
+pub fn read_file_as_text(path: String) -> Result<String, String> {
+    fs::read_to_string(&path).map_err(|e| format!("读取文件失败: {}", e))
+}
+
 /// 用系统默认程序打开文件
 #[tauri::command]
 pub fn open_file_with_system(path: String) -> Result<(), String> {

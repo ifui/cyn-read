@@ -81,10 +81,13 @@ export function useImportExport() {
     try {
       const filePath = await open({
         multiple: false,
-        filters: [{ name: "Excel", extensions: ["xlsx", "xls"] }],
+        filters: [
+          { name: "CSV", extensions: ["csv"] },
+          { name: "Excel", extensions: ["xlsx", "xls"] },
+        ],
       });
       if (!filePath || typeof filePath !== "string") return;
-      await onExcelFile(filePath);
+      await importTableFile(filePath);
     } catch (err) {
       console.error(err);
     }
@@ -103,66 +106,99 @@ export function useImportExport() {
     jsonInputRef.value.click();
   };
 
-  const onExcelFile = async (filePath: string) => {
-    try {
-      // 通过 Tauri 后端读取文件（加密系统下走系统级透明解密）
-      const bytes: number[] = await invoke("read_file_as_bytes", { path: filePath });
-      const buf = new Uint8Array(bytes);
-      const wb = read(buf, { type: "array" });
-      const ws = wb.Sheets[wb.SheetNames[0]];
-      const rowsData = utils.sheet_to_json<any>(ws, { defval: "" });
-      const first = rowsData[0] || {};
-      const keys = Object.keys(first);
-      const pickKey = (regex: RegExp, fallback: string) =>
-        keys.find((k) => regex.test(k)) || fallback;
-      const nameKey = pickKey(/姓名|名字|name/i, "姓名");
-      const deptKey = pickKey(/部门|department/i, "部门");
-      const levelKey = pickKey(/级别|level|职务级别/i, "级别");
-      const titleKey = pickKey(/职务|职位|title/i, "职务");
-      const remarkKey = pickKey(/备注|remark/i, "备注");
-      const statusKey = pickKey(/状态|参会|是否参会|attendance|status/i, "");
+  /** 从行数据中提取人员信息并存入 store */
+  const importRowsData = (rowsData: any[]) => {
+    const first = rowsData[0] || {};
+    const keys = Object.keys(first);
+    const pickKey = (regex: RegExp, fallback: string) =>
+      keys.find((k) => regex.test(k)) || fallback;
+    const nameKey = pickKey(/姓名|名字|name/i, "姓名");
+    const deptKey = pickKey(/部门|department/i, "部门");
+    const levelKey = pickKey(/级别|level|职务级别/i, "级别");
+    const titleKey = pickKey(/职务|职位|title/i, "职务");
+    const remarkKey = pickKey(/备注|remark/i, "备注");
+    const statusKey = pickKey(/状态|参会|是否参会|attendance|status/i, "");
 
-      let added = 0;
-      for (const r of rowsData) {
-        const name = String(r[nameKey] || "").trim();
-        if (!name) continue;
-        const deptPath = String(r[deptKey] || "").trim();
-        const levelName = String(r[levelKey] || "").trim();
-        // 支持 "办公室/秘书科" 这种层级写法
-        const deptId = ensureDeptPath(store, deptPath);
-        let levelId = store.levels.find((l) => l.name === levelName)?.id;
-        if (!levelId && levelName) {
-          const nl: Level = {
-            id: uid(),
-            name: levelName,
-            order: 99,
-            color: "#7d7d7d",
-          };
-          store.addLevel(nl);
-          levelId = nl.id;
-        }
-        const status: PersonStatus = statusKey
-          ? normalizeStatus(r[statusKey])
-          : "attending";
-        store.addPerson({
-          name,
-          department: deptId || "",
-          level: levelId || "",
-          title: String(r[titleKey] || "").trim(),
-          remark: String(r[remarkKey] || "").trim(),
-          status,
+    let added = 0;
+    for (const r of rowsData) {
+      const name = String(r[nameKey] || "").trim();
+      if (!name) continue;
+      const deptPath = String(r[deptKey] || "").trim();
+      const levelName = String(r[levelKey] || "").trim();
+      const deptId = ensureDeptPath(store, deptPath);
+      let levelId = store.levels.find((l) => l.name === levelName)?.id;
+      if (!levelId && levelName) {
+        const nl: Level = {
+          id: uid(),
+          name: levelName,
+          order: 99,
+          color: "#7d7d7d",
+        };
+        store.addLevel(nl);
+        levelId = nl.id;
+      }
+      const status: PersonStatus = statusKey
+        ? normalizeStatus(r[statusKey])
+        : "attending";
+      store.addPerson({
+        name,
+        department: deptId || "",
+        level: levelId || "",
+        title: String(r[titleKey] || "").trim(),
+        remark: String(r[remarkKey] || "").trim(),
+        status,
+      });
+      added++;
+    }
+    return added;
+  };
+
+  const importTableFile = async (filePath: string) => {
+    const isCsv = filePath.toLowerCase().endsWith(".csv");
+
+    try {
+      let rowsData: any[];
+
+      if (isCsv) {
+        // CSV 纯文本，加密系统不会加密
+        const text: string = await invoke("read_file_as_text", {
+          path: filePath,
         });
-        added++;
+        const wb = read(text, { type: "string" });
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        rowsData = utils.sheet_to_json<any>(ws, { defval: "" });
+      } else {
+        // Excel 二进制，加密系统可能加密文件内容
+        const bytes: number[] = await invoke("read_file_as_bytes", {
+          path: filePath,
+        });
+        const buf = new Uint8Array(bytes);
+        const wb = read(buf, { type: "array" });
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        rowsData = utils.sheet_to_json<any>(ws, { defval: "" });
+      }
+
+      const added = importRowsData(rowsData);
+      if (added === 0) {
+        throw new Error("未识别到有效数据");
       }
       message.success(`已导入 ${added} 人`);
     } catch (err) {
-      console.error("Excel 解析失败，尝试用系统默认程序打开", err);
-      message.warning("Excel 解析失败，正在用系统默认程序打开...");
-      try {
-        await invoke("open_file_with_system", { path: filePath });
-      } catch (openErr) {
-        console.error("打开文件失败", openErr);
-        message.error("打开文件失败，请检查文件是否损坏");
+      console.error("表格解析失败", err);
+      if (isCsv) {
+        message.error("CSV 解析失败，请检查文件格式和编码（需 UTF-8）");
+      } else {
+        message.warning(
+          "Excel 解析失败（可能因加密系统导致），正在用系统默认程序打开...",
+        );
+        try {
+          await invoke("open_file_with_system", { path: filePath });
+        } catch (openErr) {
+          console.error("打开文件失败", openErr);
+          message.error(
+            "打开文件失败，建议另存为 CSV 后再导入",
+          );
+        }
       }
     }
   };
@@ -177,20 +213,15 @@ export function useImportExport() {
     input.value = "";
   };
 
-  const downloadExcelTemplate = async () => {
-    const ws = utils.aoa_to_sheet([
-      ["姓名", "部门", "级别", "职务", "状态", "备注"],
-      ["张三", "办公室/秘书科", "正处级", "主任", "参会", ""],
-      ["李四", "办公室/秘书科", "副处级", "副主任", "参会", ""],
-      ["王五", "财务处/预算科", "正科级", "科长", "不参会", "请假"],
-    ]);
-    const wb = utils.book_new();
-    utils.book_append_sheet(wb, ws, "人员列表");
-    const buf = write(wb, { bookType: "xlsx", type: "array" });
-    const blob = new Blob([buf], {
-      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  const downloadTemplate = async () => {
+    const csvContent =
+      "姓名,部门,级别,职务,状态,备注\n张三,办公室/秘书科,正处级,主任,参会,\n李四,办公室/秘书科,副处级,副主任,参会,\n王五,财务处/预算科,正科级,科长,不参会,请假\n";
+    // 添加 BOM 以确保 Excel/WPS 正确识别 UTF-8 编码
+    const bom = "\uFEFF";
+    const blob = new Blob([bom + csvContent], {
+      type: "text/csv;charset=utf-8",
     });
-    const r = await saveBlob(blob, "人员导入模板.xlsx", "下载人员导入模板");
+    const r = await saveBlob(blob, "人员导入模板.csv", "下载人员导入模板");
     if (r.ok) message.success("模板已下载");
   };
 
@@ -199,6 +230,6 @@ export function useImportExport() {
     triggerExcelImport,
     triggerLayoutImport,
     onLayoutFile,
-    downloadExcelTemplate,
+    downloadTemplate,
   };
 }

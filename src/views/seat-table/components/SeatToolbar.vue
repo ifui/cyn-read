@@ -42,7 +42,7 @@ const strategyOptions = [
 ];
 
 /* ---------- 人员导入 / 模板 / 布局导入 ---------- */
-const { triggerExcelImport, downloadExcelTemplate, triggerLayoutImport } =
+const { triggerExcelImport, downloadTemplate, triggerLayoutImport } =
   useImportExport();
 
 /* ---------- 画布导出 / 打印 ---------- */
@@ -223,7 +223,7 @@ const handlePrint = async () => {
         <template #icon><i class="ri-download-2-line"></i></template>
         导出清单
       </n-button>
-      <n-button quaternary size="small" @click="downloadExcelTemplate">
+      <n-button quaternary size="small" @click="downloadTemplate">
         <template #icon><i class="ri-file-download-line"></i></template>
         模板
       </n-button>
