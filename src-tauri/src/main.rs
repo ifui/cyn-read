@@ -47,6 +47,8 @@ fn main() {
         })
         .invoke_handler(tauri::generate_handler![
             commands::file::get_file_metadata,
+            commands::file::read_file_as_bytes,
+            commands::file::open_file_with_system,
             close_splashscreen
         ])
         .run(tauri::generate_context!())

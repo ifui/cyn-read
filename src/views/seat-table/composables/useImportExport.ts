@@ -1,11 +1,13 @@
 /**
  * 导入/导出相关 composable
- * 注意：fileInputRef / jsonInputRef 在模块级共享，保证不同组件调用
- * useImportExport() 时拿到的是同一组 ref（避免 triggerExcelImport 触发空 ref）
+ * 注意：jsonInputRef 在模块级共享，保证不同组件调用
+ * useImportExport() 时拿到的是同一组 ref
  */
 import { ref } from "vue";
 import { useMessage } from "naive-ui";
 import { utils, read, write } from "xlsx";
+import { open } from "@tauri-apps/api/dialog";
+import { invoke } from "@tauri-apps/api/tauri";
 import { useSeatTableStore } from "../store";
 import { saveBlob } from "@/utils/saveFile";
 import type { Level, PersonStatus } from "../types";
@@ -67,27 +69,25 @@ const ensureDeptPath = (
 
 /* ---------- 模块级共享的 input 引用 ----------
  * 多次调用 useImportExport() 时，拿到的是同一组 ref。
- * 真实 DOM 在 index.vue 中渲染：ref="fileInputRef" / ref="jsonInputRef"
+ * 真实 DOM 在 index.vue 中渲染：ref="jsonInputRef"
  */
-const fileInputRef = ref<HTMLInputElement | null>(null);
 const jsonInputRef = ref<HTMLInputElement | null>(null);
 
 export function useImportExport() {
   const store = useSeatTableStore();
   const message = useMessage();
 
-  const triggerExcelImport = () => {
-    if (!fileInputRef.value) {
-      // 兜底：动态创建一个 input
-      const input = document.createElement("input");
-      input.type = "file";
-      input.accept = ".xlsx,.xls";
-      input.style.display = "none";
-      input.addEventListener("change", (e) => onExcelFile(e));
-      document.body.appendChild(input);
-      fileInputRef.value = input;
+  const triggerExcelImport = async () => {
+    try {
+      const filePath = await open({
+        multiple: false,
+        filters: [{ name: "Excel", extensions: ["xlsx", "xls"] }],
+      });
+      if (!filePath || typeof filePath !== "string") return;
+      await onExcelFile(filePath);
+    } catch (err) {
+      console.error(err);
     }
-    fileInputRef.value.click();
   };
   const triggerLayoutImport = () => {
     if (!jsonInputRef.value) {
@@ -103,12 +103,11 @@ export function useImportExport() {
     jsonInputRef.value.click();
   };
 
-  const onExcelFile = async (e: Event) => {
-    const input = e.target as HTMLInputElement;
-    const file = input.files?.[0];
-    if (!file) return;
+  const onExcelFile = async (filePath: string) => {
     try {
-      const buf = await file.arrayBuffer();
+      // 通过 Tauri 后端读取文件（加密系统下走系统级透明解密）
+      const bytes: number[] = await invoke("read_file_as_bytes", { path: filePath });
+      const buf = new Uint8Array(bytes);
       const wb = read(buf, { type: "array" });
       const ws = wb.Sheets[wb.SheetNames[0]];
       const rowsData = utils.sheet_to_json<any>(ws, { defval: "" });
@@ -157,10 +156,14 @@ export function useImportExport() {
       }
       message.success(`已导入 ${added} 人`);
     } catch (err) {
-      console.error(err);
-      message.error("Excel 解析失败，请检查文件格式");
-    } finally {
-      input.value = "";
+      console.error("Excel 解析失败，尝试用系统默认程序打开", err);
+      message.warning("Excel 解析失败，正在用系统默认程序打开...");
+      try {
+        await invoke("open_file_with_system", { path: filePath });
+      } catch (openErr) {
+        console.error("打开文件失败", openErr);
+        message.error("打开文件失败，请检查文件是否损坏");
+      }
     }
   };
 
@@ -192,11 +195,9 @@ export function useImportExport() {
   };
 
   return {
-    fileInputRef,
     jsonInputRef,
     triggerExcelImport,
     triggerLayoutImport,
-    onExcelFile,
     onLayoutFile,
     downloadExcelTemplate,
   };

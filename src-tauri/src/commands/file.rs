@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::Path;
+use std::process::Command;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct FileMetadata {
@@ -36,4 +37,20 @@ pub fn get_file_metadata(path: String) -> Result<FileMetadata, String> {
         modified,
         created,
     })
+}
+
+/// 通过系统级文件读取获取文件字节数据（加密系统下走透明解密）
+#[tauri::command]
+pub fn read_file_as_bytes(path: String) -> Result<Vec<u8>, String> {
+    fs::read(&path).map_err(|e| format!("读取文件失败: {}", e))
+}
+
+/// 用系统默认程序打开文件
+#[tauri::command]
+pub fn open_file_with_system(path: String) -> Result<(), String> {
+    Command::new("cmd")
+        .args(["/C", "start", "", &path])
+        .spawn()
+        .map_err(|e| format!("打开文件失败: {}", e))?;
+    Ok(())
 }

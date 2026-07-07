@@ -230,8 +230,7 @@ const handleSaveLevel = (l: Level) => {
 const handleModalError = (msg: string) => message.warning(msg);
 
 /* ---------- 导入文件输入 ---------- */
-const { fileInputRef, jsonInputRef, onExcelFile, onLayoutFile } =
-  useImportExport();
+const { jsonInputRef, onLayoutFile } = useImportExport();
 
 /* ---------- 全局：检测缺席却已就座的人员（兜底提醒） ---------- */
 let promptCooldown = 0;
@@ -263,13 +262,6 @@ onMounted(() => {
     <SeatToolbar @open-log="showLog = true" />
 
     <!-- 隐藏文件输入 -->
-    <input
-      ref="fileInputRef"
-      type="file"
-      accept=".xlsx,.xls"
-      style="display: none"
-      @change="onExcelFile"
-    />
     <input
       ref="jsonInputRef"
       type="file"

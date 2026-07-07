@@ -42,15 +42,6 @@ const formatTime = (ts: number) => {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
 };
 
-const downloadBlob = (blob: Blob, filename: string) => {
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  a.click();
-  URL.revokeObjectURL(url);
-};
-
 /* ============================================================
  * 自动排座算法：行内"中间向外"
  * 奇数 n = 2k+1：#1 居中，#2 居左，#3 居右，#4 左外，#5 右外...
